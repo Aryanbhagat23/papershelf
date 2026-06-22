@@ -2,7 +2,7 @@
 
 A full-stack web app for researchers and students to track, organize, and annotate academic papers they are reading.
 
-**Live URL:** [Deploy on Netlify — add URL here]
+**Live URL:** https://papershelf.netlify.app
 
 ---
 
