@@ -3,6 +3,7 @@ import { useAuth } from '../context/AuthContext'
 import { supabase } from '../lib/supabase'
 import AddPaperModal from '../components/AddPaperModal'
 import EditPaperModal from '../components/EditPaperModal'
+import AISummaryModal from '../components/AISummaryModal'
 import PaperCard from '../components/PaperCard'
 
 const STATUS_FILTERS = ['all', 'unread', 'reading', 'done']
@@ -14,6 +15,7 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true)
   const [showAdd, setShowAdd] = useState(false)
   const [editPaper, setEditPaper] = useState(null)
+  const [aiPaper, setAiPaper] = useState(null)
 
   const fetchPapers = useCallback(async () => {
     setLoading(true)
@@ -45,12 +47,14 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen">
-      {/* Header */}
       <header className="border-b border-gray-800 bg-gray-900/50 sticky top-0 z-10 backdrop-blur">
         <div className="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <span className="text-2xl">📚</span>
             <span className="text-xl font-bold">PaperShelf</span>
+            <span className="text-xs bg-purple-900/40 border border-purple-700 text-purple-300 px-2 py-0.5 rounded-full">
+              ✨ AI Powered
+            </span>
           </div>
           <div className="flex items-center gap-4">
             <span className="text-gray-400 text-sm hidden sm:block">{user.email}</span>
@@ -65,9 +69,11 @@ export default function Dashboard() {
       </header>
 
       <main className="max-w-5xl mx-auto px-4 py-8">
-        {/* Top bar */}
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-bold">My Papers</h2>
+          <div>
+            <h2 className="text-2xl font-bold">My Papers</h2>
+            <p className="text-gray-500 text-sm mt-0.5">Hover a paper to see AI Summary</p>
+          </div>
           <button
             onClick={() => setShowAdd(true)}
             className="bg-blue-600 hover:bg-blue-500 text-white font-semibold px-4 py-2 rounded-lg transition flex items-center gap-2"
@@ -76,7 +82,6 @@ export default function Dashboard() {
           </button>
         </div>
 
-        {/* Filter tabs */}
         <div className="flex gap-2 mb-6 flex-wrap">
           {STATUS_FILTERS.map(f => (
             <button
@@ -93,7 +98,6 @@ export default function Dashboard() {
           ))}
         </div>
 
-        {/* Papers list */}
         {loading ? (
           <div className="text-center text-gray-400 py-20">Loading your papers...</div>
         ) : filtered.length === 0 ? (
@@ -121,6 +125,7 @@ export default function Dashboard() {
                 paper={paper}
                 onEdit={() => setEditPaper(paper)}
                 onDelete={() => handleDelete(paper.id)}
+                onAISummary={() => setAiPaper(paper)}
               />
             ))}
           </div>
@@ -146,6 +151,13 @@ export default function Dashboard() {
             setPapers(prev => prev.map(p => p.id === updated.id ? updated : p))
             setEditPaper(null)
           }}
+        />
+      )}
+
+      {aiPaper && (
+        <AISummaryModal
+          paper={aiPaper}
+          onClose={() => setAiPaper(null)}
         />
       )}
     </div>
