@@ -4,6 +4,7 @@ import { supabase } from '../lib/supabase'
 import AddPaperModal from '../components/AddPaperModal'
 import EditPaperModal from '../components/EditPaperModal'
 import AISummaryModal from '../components/AISummaryModal'
+import ResearchGapModal from '../components/ResearchGapModal'
 import PaperCard from '../components/PaperCard'
 
 const STATUS_FILTERS = ['all', 'unread', 'reading', 'done']
@@ -16,6 +17,7 @@ export default function Dashboard() {
   const [showAdd, setShowAdd] = useState(false)
   const [editPaper, setEditPaper] = useState(null)
   const [aiPaper, setAiPaper] = useState(null)
+  const [showGapFinder, setShowGapFinder] = useState(false)
 
   const fetchPapers = useCallback(async () => {
     setLoading(true)
@@ -47,6 +49,7 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen">
+      {/* Header */}
       <header className="border-b border-gray-800 bg-gray-900/50 sticky top-0 z-10 backdrop-blur">
         <div className="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -56,7 +59,15 @@ export default function Dashboard() {
               ✨ AI Powered
             </span>
           </div>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3">
+            {/* Research Gap Finder button in header */}
+            <button
+              onClick={() => setShowGapFinder(true)}
+              disabled={papers.length === 0}
+              className="text-sm bg-purple-900/30 hover:bg-purple-900/50 disabled:opacity-40 border border-purple-700 text-purple-300 px-3 py-1.5 rounded-lg transition flex items-center gap-1.5"
+            >
+              🔍 Gap Finder
+            </button>
             <span className="text-gray-400 text-sm hidden sm:block">{user.email}</span>
             <button
               onClick={signOut}
@@ -69,10 +80,13 @@ export default function Dashboard() {
       </header>
 
       <main className="max-w-5xl mx-auto px-4 py-8">
+        {/* Top bar */}
         <div className="flex items-center justify-between mb-6">
           <div>
             <h2 className="text-2xl font-bold">My Papers</h2>
-            <p className="text-gray-500 text-sm mt-0.5">Hover a paper to see AI Summary</p>
+            <p className="text-gray-500 text-sm mt-0.5">
+              Hover a card for AI Summary · Use Gap Finder to analyze your shelf
+            </p>
           </div>
           <button
             onClick={() => setShowAdd(true)}
@@ -82,6 +96,7 @@ export default function Dashboard() {
           </button>
         </div>
 
+        {/* Filter tabs */}
         <div className="flex gap-2 mb-6 flex-wrap">
           {STATUS_FILTERS.map(f => (
             <button
@@ -98,6 +113,7 @@ export default function Dashboard() {
           ))}
         </div>
 
+        {/* Papers list */}
         {loading ? (
           <div className="text-center text-gray-400 py-20">Loading your papers...</div>
         ) : filtered.length === 0 ? (
@@ -130,8 +146,27 @@ export default function Dashboard() {
             ))}
           </div>
         )}
+
+        {/* Gap finder CTA when papers exist */}
+        {papers.length >= 2 && (
+          <div className="mt-8 border border-purple-800/50 rounded-xl p-4 bg-purple-900/10 flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-purple-300">🔍 Research Gap Finder</p>
+              <p className="text-xs text-gray-500 mt-0.5">
+                Analyze all {papers.length} papers and discover what you should read next
+              </p>
+            </div>
+            <button
+              onClick={() => setShowGapFinder(true)}
+              className="text-sm bg-purple-600 hover:bg-purple-500 text-white font-semibold px-4 py-2 rounded-lg transition"
+            >
+              Analyze Shelf →
+            </button>
+          </div>
+        )}
       </main>
 
+      {/* Modals */}
       {showAdd && (
         <AddPaperModal
           userId={user.id}
@@ -158,6 +193,13 @@ export default function Dashboard() {
         <AISummaryModal
           paper={aiPaper}
           onClose={() => setAiPaper(null)}
+        />
+      )}
+
+      {showGapFinder && (
+        <ResearchGapModal
+          papers={papers}
+          onClose={() => setShowGapFinder(false)}
         />
       )}
     </div>
